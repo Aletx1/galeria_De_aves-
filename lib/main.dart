@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
-import 'views/inicio.dart';
-import 'views/galeria.dart';
-import 'views/comunidad.dart'; // Nuevo
-import 'views/reportes.dart';  // Nuevo
 
-void main() {
-  runApp(const AvesCLApp());
+import 'services/app_data_service.dart';
+import 'views/comunidad.dart';
+import 'views/galeria.dart';
+import 'views/inicio.dart';
+import 'views/perfil.dart';
+import 'views/reportes.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final dataService = AppDataService();
+  await dataService.init();
+  runApp(AvesCLApp(dataService: dataService));
 }
 
 class AvesCLApp extends StatefulWidget {
-  const AvesCLApp({super.key});
+  final AppDataService dataService;
+
+  const AvesCLApp({super.key, required this.dataService});
 
   @override
   State<AvesCLApp> createState() => _AvesCLAppState();
@@ -20,7 +28,9 @@ class _AvesCLAppState extends State<AvesCLApp> {
 
   void toggleTheme() {
     setState(() {
-      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+      _themeMode = _themeMode == ThemeMode.light
+          ? ThemeMode.dark
+          : ThemeMode.light;
     });
   }
 
@@ -29,7 +39,6 @@ class _AvesCLAppState extends State<AvesCLApp> {
     return MaterialApp(
       title: 'AvesCL',
       debugShowCheckedModeBanner: false,
-      // Tu tema original claro
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4E8F63),
@@ -38,7 +47,6 @@ class _AvesCLAppState extends State<AvesCLApp> {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF7F8F2),
       ),
-      // Nuevo tema oscuro adaptado a tus colores
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4E8F63),
@@ -47,14 +55,23 @@ class _AvesCLAppState extends State<AvesCLApp> {
         useMaterial3: true,
       ),
       themeMode: _themeMode,
-      home: MainNavigation(toggleTheme: toggleTheme),
+      home: MainNavigation(
+        dataService: widget.dataService,
+        toggleTheme: toggleTheme,
+      ),
     );
   }
 }
 
 class MainNavigation extends StatefulWidget {
+  final AppDataService dataService;
   final VoidCallback toggleTheme;
-  const MainNavigation({super.key, required this.toggleTheme});
+
+  const MainNavigation({
+    super.key,
+    required this.dataService,
+    required this.toggleTheme,
+  });
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -67,12 +84,18 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // Aquí conectamos todas tus vistas
     _views = [
-      InicioView(toggleTheme: widget.toggleTheme),
-      const GaleriaView(),
-      const ComunidadView(),
-      const ReportesView(),
+      InicioView(
+        toggleTheme: widget.toggleTheme,
+        dataService: widget.dataService,
+      ),
+      GaleriaView(dataService: widget.dataService),
+      ComunidadView(dataService: widget.dataService),
+      ReportesView(dataService: widget.dataService),
+      PerfilView(
+        dataService: widget.dataService,
+        toggleTheme: widget.toggleTheme,
+      ),
     ];
   }
 
@@ -82,12 +105,34 @@ class _MainNavigationState extends State<MainNavigation> {
       body: _views[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) =>
+            setState(() => _selectedIndex = index),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
-          NavigationDestination(icon: Icon(Icons.photo_library_outlined), selectedIcon: Icon(Icons.photo_library), label: 'Galería'),
-          NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: 'Comunidad'),
-          NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: 'Reportes'),
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.photo_library_outlined),
+            selectedIcon: Icon(Icons.photo_library),
+            label: 'Galeria',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people),
+            label: 'Comunidad',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Reportes',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
         ],
       ),
     );

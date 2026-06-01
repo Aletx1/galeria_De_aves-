@@ -33,11 +33,14 @@ class _LoginViewState extends State<LoginView> {
       return;
     }
 
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const InicioView(),
-      ),
+      MaterialPageRoute(builder: (_) => const InicioView()),
     );
   }
 
@@ -50,9 +53,7 @@ class _LoginViewState extends State<LoginView> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 420,
-              ),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,10 +89,7 @@ class _LoginViewState extends State<LoginView> {
                   const Text(
                     'Bitácora fotográfica de aves chilenas',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF667066),
-                    ),
+                    style: TextStyle(fontSize: 16, color: Color(0xFF667066)),
                   ),
 
                   const SizedBox(height: 34),
